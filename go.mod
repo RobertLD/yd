@@ -1,6 +1,6 @@
 module github.com/RobertLD/yd
 
-go 1.23
+go 1.21
 
 require golang.design/x/clipboard v0.7.0
 
