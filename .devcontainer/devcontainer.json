@@ -1,0 +1,87 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.224.3/containers/python-3
+{
+    "name": "go-digest",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": "..",
+        "args": {
+            // Map your local username as the non-root user in the container
+            "USERNAME": "${localEnv:USER}",
+            "USER_UID": "1001",
+            "USER_GID": "1001"
+        }
+    },
+    "runArgs": ["--hostname=${localWorkspaceFolderBasename}-container"],
+    "remoteUser": "${localEnv:USER}",
+    "containerUser": "${localEnv:USER}",
+    "mounts": [
+        // krb5 mounts
+        "source=/usr/local/var/krb5/user,target=/usr/local/var/krb5/user,type=bind,consistency=cached",
+        "source=/etc/krb5.conf,target=/etc/krb5.conf,type=bind,consistency=cached",
+        "source=/etc/krb5.conf.d,target=/etc/krb5.conf.d,type=bind,consistency=cached",
+
+
+        // User dot file mounts
+        "source=${localEnv:HOME}/.ssh,target=${localEnv:HOME}/.ssh,type=bind,consistency=cached",
+        "source=${localEnv:HOME}/.kube,target=${localEnv:HOME}/.kube,type=bind,consistency=cached",
+
+    ],
+    // Set *default* container specific settings.json values on container create.
+    "customizations": {
+        "vscode": {
+            "settings": {
+                // Sonar lint settings
+                "sonarlint.ls.javaHome": "/usr",
+                "sonarlint.connectedMode.connections.sonarqube": [
+                    {
+                        "serverUrl": "http://sonarqube.domain.voloridge.com:9000/",
+                        "token": "sqp_7f7f7f3d2b671456d9471762802b17d4a670aa46"
+                    }
+                ],
+                "files.insertFinalNewline": true,
+                "files.trimFinalNewlines": true,
+                "files.trimTrailingWhitespace": true,
+                "terminal.integrated.scrollback": 10000,
+                "vs-kubernetes": {
+                    "vs-kubernetes.kubeconfig": "${localEnv:HOME}/.kube/config-sandbox:${localEnv:HOME}/.kube/config-dev:${localEnv:HOME}/.kube/config-qa:${localEnv:HOME}/.kube/config-uat:${localEnv:HOME}/.kube/config-prod"
+                }
+            },
+            // Add the IDs of extensions you want installed when the container is created.
+            "extensions": [
+                "donjayamanne.githistory",
+                "eamodio.gitlens",
+                "ms-azuretools.vscode-docker",
+                "ms-kubernetes-tools.vscode-kubernetes-tools",
+                "SonarSource.sonarlint-vscode",
+                "VisualStudioExptTeam.vscodeintellicode",
+                "golang.go"
+            ]
+        }
+    },
+
+    // Use 'forwardPorts' to make a list of ports inside the container available locally.
+    // "forwardPorts": [],
+    //"onCreateCommand": "sudo usermod -a -G docker ${localEnv:USER}",
+    // Use 'postCreateCommand' to run commands after the container is created.
+    "postCreateCommand": ".devcontainer/postcreate.sh",
+
+    // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+    // "remoteUser": "${localEnv:USER}",
+    "features": {
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+        "ghcr.io/devcontainers/features/git:1": {},
+        "kubectl-helm-minikube": "latest"
+    },
+    "containerEnv": {
+        "HOME": "${localEnv:HOME}",
+        "USER": "${localEnv:USER}",
+        "KUBECONFIG": "${localEnv:HOME}/.kube/config-sandbox:${localEnv:HOME}/.kube/config-dev:${localEnv:HOME}/.kube/config-qa:${localEnv:HOME}/.kube/config-uat:${localEnv:HOME}/.kube/config-prod"
+    },
+    "remoteEnv": {
+        "HOME": "${containerEnv:HOME}",
+        "USER": "${containerEnv:USER}",
+        "PATH": "${containerEnv:PATH}:${localEnv:HOME}/.local/bin",
+        "PYTHONPATH": "${containerWorkspaceFolder}"
+    }
+}
